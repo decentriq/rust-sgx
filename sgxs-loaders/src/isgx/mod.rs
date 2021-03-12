@@ -79,6 +79,8 @@ pub enum Error {
     Create(#[cause] SgxIoctlError),
     #[fail(display = "Failed to call EADD.")]
     Add(#[cause] SgxIoctlError),
+    #[fail(display = "Failed to call EEXTEND.")]
+    Extend(#[cause] SgxIoctlError),
     #[fail(display = "Failed to call EINIT.")]
     Init(#[cause] SgxIoctlError),
 }
@@ -226,11 +228,13 @@ impl EnclaveLoad for InnerDevice {
                 let flags = match chunks.0 {
                     0 => ioctl::augusta::SgxPageFlags::empty(),
                     0xffff => ioctl::augusta::SgxPageFlags::SGX_PAGE_MEASURE,
-                    _ => {
-                        return Err(Error::Add(SgxIoctlError::Io(IoError::new(
-                            io::ErrorKind::Other,
-                            "Partially-measured pages not supported in this driver",
-                        ))))
+                    partial => {
+                        let mut extenddata = ioctl::augusta::ExtendData {
+                            src: data.as_ptr(),
+                            length: partial as _,
+                            count: 0,
+                        };
+                        return ioctl_unsafe!(Extend, ioctl::augusta::extend(mapping.device.fd.as_raw_fd(), &mut extenddata))
                     }
                 };
 
