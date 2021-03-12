@@ -228,15 +228,14 @@ impl EnclaveLoad for InnerDevice {
                 let flags = match chunks.0 {
                     0 => ioctl::augusta::SgxPageFlags::empty(),
                     0xffff => ioctl::augusta::SgxPageFlags::SGX_PAGE_MEASURE,
-                    _partial => {
-                        assert_eq!(data.len() % 256, 0);
+                    partial => {
                         let mut extenddata = ioctl::augusta::ExtendData {
                             src: data.as_ptr(),
-                            length: data.len() as _,
+                            length: partial as u64 * 256,
                             count: 0,
                         };
                         println!("extend data = {:?}", &extenddata);
-                        println!("partial = {:?}", _partial);
+                        println!("partial = {:?}", partial);
                         return ioctl_unsafe!(Extend, ioctl::augusta::extend(mapping.device.fd.as_raw_fd(), &mut extenddata))
                     }
                 };
