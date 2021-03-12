@@ -229,6 +229,7 @@ impl EnclaveLoad for InnerDevice {
                     0 => ioctl::augusta::SgxPageFlags::empty(),
                     0xffff => ioctl::augusta::SgxPageFlags::SGX_PAGE_MEASURE,
                     partial => {
+                        assert_eq!(partial % 256, 0);
                         let mut extenddata = ioctl::augusta::ExtendData {
                             src: data.as_ptr(),
                             length: partial as _,
