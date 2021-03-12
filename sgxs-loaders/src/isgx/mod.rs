@@ -235,6 +235,7 @@ impl EnclaveLoad for InnerDevice {
                             length: partial as _,
                             count: 0,
                         };
+                        println!("extend data = {:?}", &extenddata);
                         return ioctl_unsafe!(Extend, ioctl::augusta::extend(mapping.device.fd.as_raw_fd(), &mut extenddata))
                     }
                 };
