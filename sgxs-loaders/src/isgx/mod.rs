@@ -257,7 +257,7 @@ impl EnclaveLoad for InnerDevice {
                         src: eadd.offset,
                         length: chunks.0 as u64 * 256,
                     };
-                    ioctl_unsafe!(Extend, ioctl::augusta::extend(mapping.device.fd.as_raw_fd(), &mut extenddata))
+                    ioctl_unsafe!(Extend, ioctl::augusta::extend(mapping.device.fd.as_raw_fd(), &mut extenddata))?;
                 }
 
                 let prot = match PageType::try_from(secinfo.flags.page_type()) {
