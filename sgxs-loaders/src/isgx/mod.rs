@@ -254,7 +254,7 @@ impl EnclaveLoad for InnerDevice {
 
                 if chunks.0 != 0xffff && chunks.0 != 0 {
                     let mut extenddata = ioctl::augusta::ExtendData {
-                        src: eadd.offset,
+                        offset: eadd.offset,
                         length: chunks.0 as u64 * 256,
                     };
                     println!("extend data = {:?}", &extenddata);
