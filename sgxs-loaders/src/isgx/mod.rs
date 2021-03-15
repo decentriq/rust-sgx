@@ -257,6 +257,7 @@ impl EnclaveLoad for InnerDevice {
                         src: eadd.offset,
                         length: chunks.0 as u64 * 256,
                     };
+                    println!("extend data = {:?}", &extenddata);
                     ioctl_unsafe!(Extend, ioctl::augusta::extend(mapping.device.fd.as_raw_fd(), &mut extenddata))?;
                 }
 
