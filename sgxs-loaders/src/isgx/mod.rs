@@ -226,8 +226,9 @@ impl EnclaveLoad for InnerDevice {
             },
             Augusta => {
                 let flags = match chunks.0 {
-                    0 => ioctl::augusta::SgxPageFlags::empty(),
                     0xffff => ioctl::augusta::SgxPageFlags::SGX_PAGE_MEASURE,
+                    _ => ioctl::augusta::SgxPageFlags::empty()
+                        /*
                     partial => {
                         let mut extenddata = ioctl::augusta::ExtendData {
                             src: data.as_ptr() as _,
@@ -236,7 +237,7 @@ impl EnclaveLoad for InnerDevice {
                         println!("extend data = {:?}", &extenddata);
                         println!("partial = {:?}", partial);
                         return ioctl_unsafe!(Extend, ioctl::augusta::extend(mapping.device.fd.as_raw_fd(), &mut extenddata))
-                    }
+                    }*/
                 };
 
                 let data = ioctl::augusta::Align4096(data);
@@ -250,6 +251,14 @@ impl EnclaveLoad for InnerDevice {
                 };
                 ioctl_unsafe!(Add, ioctl::augusta::add(mapping.device.fd.as_raw_fd(), &mut adddata))?;
                 assert_eq!(adddata.length, adddata.count);
+
+                if chunks.0 != 0xffff && chunks.0 != 0 {
+                    let mut extenddata = ioctl::augusta::ExtendData {
+                        src: eadd.offset,
+                        length: chunks.0 as u64 * 256,
+                    };
+                    ioctl_unsafe!(Extend, ioctl::augusta::extend(mapping.device.fd.as_raw_fd(), &mut extenddata))
+                }
 
                 let prot = match PageType::try_from(secinfo.flags.page_type()) {
                     Ok(PageType::Reg) => {
